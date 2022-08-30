@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react"
+import { createContext, useContext, useState } from "react"
 
 type SignInCredentials = {
   email: string
@@ -26,4 +26,4 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   return <AuthContext.Provider value={{ signIn, isAuthenticated }}>{children}</AuthContext.Provider>
 }
 
-export const useAuthContext = useContext(AuthContext)
+export const useAuthContext = () => useContext(AuthContext)

@@ -1,16 +1,42 @@
 import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult } from "next"
 import { destroyCookie, parseCookies } from "nookies"
 import { AuthTokenError } from "../services/errors/AuthTokerError"
+import decode from "jwt-decode"
+import { validateUserPermissions } from "./validateUserPermissions"
 
-export const withSSRAuth = <P>(fn: GetServerSideProps<P>) => {
+type WithSSRAuthOptions = {
+  permissions?: string[]
+  roles?: string[]
+}
+
+export const withSSRAuth = <P>(fn: GetServerSideProps<P>, options?: WithSSRAuthOptions) => {
   return async (ctx: GetServerSidePropsContext): Promise<GetServerSidePropsResult<P>> => {
     const cookies = parseCookies(ctx)
+    const token = cookies["rs-auth-token"]
 
-    if (!cookies["rs-auth-token"]) {
+    if (!token) {
       return {
         redirect: {
           destination: "/",
           permanent: false
+        }
+      }
+    }
+
+    if (options) {
+      const user = decode<{ permissions: string[]; roles: string[] }>(token)
+      const userHasValidPermissions = validateUserPermissions({
+        user,
+        permissions: options.permissions,
+        roles: options.roles
+      })
+
+      if (!userHasValidPermissions) {
+        return {
+          redirect: {
+            destination: "/dashboard",
+            permanent: false
+          }
         }
       }
     }

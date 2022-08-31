@@ -3,6 +3,7 @@ import { parseCookies } from "nookies"
 import { FormEvent, useState } from "react"
 import { useAuthContext } from "../context/AuthContext"
 import styles from "../styles/home.module.css"
+import { withSSRGuest } from "../utils/withSSRGuest"
 
 const Home = () => {
   const { isAuthenticated, signIn } = useAuthContext()
@@ -32,21 +33,10 @@ const Home = () => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const cookies = parseCookies(ctx)
-
-  if (cookies["rs-auth-token"]) {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false
-      }
-    }
-  }
-
+export const getServerSideProps = withSSRGuest(async (ctx) => {
   return {
     props: {}
   }
-}
+})
 
 export default Home

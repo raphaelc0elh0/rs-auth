@@ -1,6 +1,6 @@
 import Router from "next/router"
 import { createContext, useContext, useEffect, useState } from "react"
-import { api, setDefaultToken } from "../services/api"
+import { api } from "../services/apiClient"
 import { setCookie, parseCookies, destroyCookie } from "nookies"
 
 type User = {
@@ -29,6 +29,7 @@ interface AuthProviderProps {
 export const signOut = () => {
   destroyCookie(undefined, "rs-auth-token")
   destroyCookie(undefined, "rs-auth-refreshToken")
+
   Router.push("/")
 }
 
@@ -69,7 +70,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       setUser({ email, permissions, roles })
 
-      setDefaultToken(token)
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`
 
       Router.push("/dashboard")
     } catch (error) {

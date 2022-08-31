@@ -1,5 +1,6 @@
 import axios, { AxiosError } from "axios"
 import { parseCookies, setCookie } from "nookies"
+import { signOut } from "../context/AuthContext"
 
 type ErrorType = { message?: string; code?: string }
 type FailedRequestQueue = {
@@ -76,8 +77,10 @@ api.interceptors.response.use(
           })
         })
       } else {
-        // deslogar o usuário
+        signOut()
       }
     }
+
+    return Promise.reject(error)
   }
 )

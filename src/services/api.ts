@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios"
 import { GetServerSidePropsContext } from "next"
 import { parseCookies, setCookie } from "nookies"
 import { signOut } from "../context/AuthContext"
+import { AuthTokenError } from "./errors/AuthTokerError"
 
 type ErrorType = { message?: string; code?: string }
 type FailedRequestQueue = {
@@ -56,7 +57,11 @@ export const setupAPIClient = (ctx?: GetServerSidePropsContext) => {
                 failedRequestsQueue.forEach((request) => request.onFailure(error))
                 failedRequestsQueue = []
 
-                if (typeof window !== "undefined") signOut()
+                if (typeof window !== "undefined") {
+                  signOut()
+                } else {
+                  return Promise.reject(new AuthTokenError())
+                }
               })
               .finally(() => {
                 isRefreshing = false
@@ -78,7 +83,11 @@ export const setupAPIClient = (ctx?: GetServerSidePropsContext) => {
             })
           })
         } else {
-          if (typeof window !== "undefined") signOut()
+          if (typeof window !== "undefined") {
+            signOut()
+          } else {
+            return Promise.reject(new AuthTokenError())
+          }
         }
       }
 

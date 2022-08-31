@@ -1,7 +1,7 @@
 import Router from "next/router"
-import { createContext, useContext, useState } from "react"
-import { api } from "../services/api"
-import { setCookie } from "nookies"
+import { createContext, useContext, useEffect, useState } from "react"
+import { api, setDefaultToken } from "../services/api"
+import { setCookie, parseCookies } from "nookies"
 
 type User = {
   email: string
@@ -30,6 +30,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User>()
   const isAuthenticated = !!user
 
+  useEffect(() => {
+    const { "rs-auth-token": token } = parseCookies()
+
+    if (token) {
+      api.get("/me").then((response) => {
+        const { email, permissions, roles } = response.data
+
+        setUser({ email, permissions, roles })
+      })
+    }
+  }, [])
+
   const signIn = async ({ email, password }: SignInCredentials) => {
     try {
       const response = await api.post("/sessions", { email, password })
@@ -45,6 +57,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       })
 
       setUser({ email, permissions, roles })
+
+      setDefaultToken(token)
+
       Router.push("/dashboard")
     } catch (error) {
       console.log(error)

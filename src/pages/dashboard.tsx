@@ -5,11 +5,12 @@ import { setupAPIClient } from "../services/api"
 import { withSSRAuth } from "../utils/withSSRAuth"
 
 const Dashboard = () => {
-  const { user } = useAuthContext()
+  const { user, signOut } = useAuthContext()
 
   return (
     <>
       <h1>Dashboard: {user?.email}</h1>
+      <button onClick={signOut}>Sign Out</button>
     </>
   )
 }
